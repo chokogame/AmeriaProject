@@ -1,0 +1,44 @@
+# Unreal Engine Specific
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vscode/
+*.opensdf
+*.sdf
+*.VC.db
+*.log
+
+# Visual Studio
+.vs/
+*.VC.opendb
+*.VC.db
+*.obj
+*.pdb
+*.ipch
+*.db
+*.opendb
+*.log
+*.suo
+*.cache
+*.ilk
+*.aps
+*.ncb
+*.user
+*.sln.docstates
+
+# OSX
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Backup files
+*.bak
+*.tmp
+~$*
+
+# Ignore specific files
+Content/StarterContent/HDRI/HDRI_Epic_Courtyard_Daylight.uasset
+.vs/ProjectAmeria/v17/ipch/

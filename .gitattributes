@@ -1,0 +1,17 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.c text
+*.cpp text
+*.cs text
+*.h text
+*.hpp text
+*.java text
+*.js text
+*.json text
+*.md text
+*.py text
+*.sh text
+*.txt text
