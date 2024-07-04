@@ -7,8 +7,11 @@
 #include "MyPlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "UObject/ConstructorHelpers.h"
-#include <Kismet/GameplayStatics.h>
+#include "Kismet/GameplayStatics.h"
 
 
 AProjectAmeriaGameMode::AProjectAmeriaGameMode()
@@ -34,6 +37,10 @@ AProjectAmeriaGameMode::AProjectAmeriaGameMode()
     {
         TurnInfoWidgetClass = WidgetClassFinder.Class;
     }
+
+    InitialWidgetPosition = FVector2D(50, 50);
+    WidgetOffset = FVector2D(0, 30);
+
     PrimaryActorTick.bCanEverTick = true; // Tickを有効にする
 }
 
@@ -198,6 +205,8 @@ void AProjectAmeriaGameMode::UpdateTurnInfoUI()
 
 void AProjectAmeriaGameMode::UpdateActionPointsUI()
 {
+    FVector2D CurrentPosition = InitialWidgetPosition;
+
     // プレイヤーキャラクターの行動力を表示
     if (AProjectAmeriaCharacter* PlayerCharacter = Cast<AProjectAmeriaCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0)))
     {
@@ -217,12 +226,16 @@ void AProjectAmeriaGameMode::UpdateActionPointsUI()
             UTextBlock* ActionPointsText = Cast<UTextBlock>(PlayerActionPointsWidget->GetWidgetFromName("ActionPointsText"));
             if (ActionPointsText)
             {
+                UpdateTextBlockPosition(ActionPointsText, CurrentPosition);
                 FString ActionPointsString = FString::Printf(TEXT("Player AP: %d"), static_cast<int32>(PlayerCharacter->GetCurrentActionPoints()));
                 ActionPointsText->SetText(FText::FromString(ActionPointsString));
             }
+            UE_LOG(LogTemp, Log, TEXT("Player Action Points Widget position set to: X=%f, Y=%f"), CurrentPosition.X, CurrentPosition.Y);
         }
+        CurrentPosition += WidgetOffset;
     }
 
+    // NPCキャラクターの行動力を表示
     for (TActorIterator<ANPCCharacter> It(GetWorld()); It; ++It)
     {
         ANPCCharacter* NPC = *It;
@@ -242,6 +255,7 @@ void AProjectAmeriaGameMode::UpdateActionPointsUI()
             UTextBlock* ActionPointsText = Cast<UTextBlock>(ActionPointsWidget->GetWidgetFromName("ActionPointsText"));
             if (ActionPointsText)
             {
+                UpdateTextBlockPosition(ActionPointsText, CurrentPosition);
                 FString ActionPointsString;
                 switch (NPC->Affiliation)
                 {
@@ -257,6 +271,30 @@ void AProjectAmeriaGameMode::UpdateActionPointsUI()
                 }
                 ActionPointsText->SetText(FText::FromString(ActionPointsString));
             }
+            UE_LOG(LogTemp, Log, TEXT("NPC Action Points Widget position set to: X=%f, Y=%f"), CurrentPosition.X, CurrentPosition.Y);
         }
-    }  
+        CurrentPosition += WidgetOffset;
+    }
 }
+
+void AProjectAmeriaGameMode::UpdateTextBlockPosition(UTextBlock* TextBlock, FVector2D Position)
+{
+    if (TextBlock)
+    {
+        UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(TextBlock->Slot);
+        if (CanvasSlot)
+        {
+            CanvasSlot->SetPosition(Position);
+            UE_LOG(LogTemp, Log, TEXT("TextBlock position set to: X=%f, Y=%f"), Position.X, Position.Y);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("TextBlock is not in a Canvas Panel Slot"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("TextBlock is null"));
+    }
+}
+

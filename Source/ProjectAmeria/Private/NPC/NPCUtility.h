@@ -16,5 +16,6 @@ class PROJECTAMERIA_API UNPCUtility : public UBlueprintFunctionLibrary
 
 public:
     UFUNCTION(BlueprintCallable, Category = "NPC")
-        static void ChangeNPCsAffiliation(AActor* NPCActor, EAffiliation NewAffiliation);
+    static void ChangeNPCsAffiliation(AActor* NPCActor, EAffiliation NewAffiliation);
+    
 };

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
 #include "ProjectAmeriaGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -31,6 +32,13 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
         TSubclassOf<UUserWidget> ActionPointsWidgetClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+        FVector2D InitialWidgetPosition;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+        FVector2D WidgetOffset;
+
     void HandlePlayerTurn();
 private:
     void HandleAllyNPCTurn();
@@ -49,6 +57,7 @@ private:
     ETurnState CurrentTurnState;
     void UpdateTurnInfoUI();
     void UpdateActionPointsUI();
+    void UpdateTextBlockPosition(UTextBlock* TextBlock, FVector2D Position);
 
     UPROPERTY()
         UUserWidget* TurnInfoWidget;
