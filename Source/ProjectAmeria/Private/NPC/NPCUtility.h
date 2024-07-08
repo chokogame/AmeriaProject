@@ -17,5 +17,9 @@ class PROJECTAMERIA_API UNPCUtility : public UBlueprintFunctionLibrary
 public:
     UFUNCTION(BlueprintCallable, Category = "NPC")
     static void ChangeNPCsAffiliation(AActor* NPCActor, EAffiliation NewAffiliation);
+
+    // ダメージ計算の関数
+    UFUNCTION(BlueprintCallable, Category = "Damage")
+        static float CalculateDamage(AActor* Attacker, AActor* Defender, float BasePower, float Multiplier, bool bIsMagicAttack);
     
 };

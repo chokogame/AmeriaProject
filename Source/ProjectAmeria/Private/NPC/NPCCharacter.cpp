@@ -59,6 +59,15 @@ float ANPCCharacter::GetCurrentActionPoints() const
 	return CurrentActionPoints;
 }
 
+void ANPCCharacter::ExecuteAction(UActionBase* Action)
+{
+	if (Action && CurrentActionPoints >= Action->GetActionPointCost())
+	{
+		Action->ExecuteAction(this);
+	}
+}
+
+
 void ANPCCharacter::SetCurrentActionPoints(float Points)
 {
 	CurrentActionPoints = Points;
@@ -77,4 +86,114 @@ void ANPCCharacter::SetMaxActionPoints(float Points)
 void ANPCCharacter::SetAffiliation(EAffiliation NewAffiliation)
 {
 	Affiliation = NewAffiliation;
+}
+
+float ANPCCharacter::GetStrength() const
+{
+	return PlayerStats->GetStrength();
+}
+
+void ANPCCharacter::SetStrength(float Value)
+{
+	PlayerStats->SetStrength(Value);
+}
+
+float ANPCCharacter::GetMagicPower() const
+{
+	return PlayerStats->GetMagicPower();
+}
+
+void ANPCCharacter::SetMagicPower(float Value)
+{
+	PlayerStats->SetMagicPower(Value);
+}
+
+float ANPCCharacter::GetDefense() const
+{
+	return PlayerStats->GetEndurance();
+}
+
+void ANPCCharacter::SetDefense(float Value)
+{
+	PlayerStats->SetEndurance(Value);
+}
+
+float ANPCCharacter::GetResistance() const
+{
+	return PlayerStats->GetMagicResistance();
+}
+
+void ANPCCharacter::SetResistance(float Value)
+{
+	PlayerStats->SetMagicResistance(Value);
+}
+
+float ANPCCharacter::GetHealth() const
+{
+	return PlayerStats->GetHealth();
+}
+
+void ANPCCharacter::SetHealth(float Value)
+{
+	PlayerStats->SetHealth(Value);
+}
+
+float ANPCCharacter::GetMana() const
+{
+	return PlayerStats->GetMana();
+}
+
+void ANPCCharacter::SetMana(float Value)
+{
+	PlayerStats->SetMana(Value);
+}
+
+float ANPCCharacter::GetEndurance() const
+{
+	return PlayerStats->GetEndurance();
+}
+
+void ANPCCharacter::SetEndurance(float Value)
+{
+	PlayerStats->SetEndurance(Value);
+}
+
+float ANPCCharacter::GetAgility() const
+{
+	return PlayerStats->GetAgility();
+}
+
+void ANPCCharacter::SetAgility(float Value)
+{
+	PlayerStats->SetAgility(Value);
+}
+
+float ANPCCharacter::GetDexterity() const
+{
+	return PlayerStats->GetDexterity();
+}
+
+void ANPCCharacter::SetDexterity(float Value)
+{
+	PlayerStats->SetDexterity(Value);
+}
+
+float ANPCCharacter::GetIntelligence() const
+{
+	return PlayerStats->GetIntelligence();
+}
+
+void ANPCCharacter::SetIntelligence(float Value)
+{
+	PlayerStats->SetIntelligence(Value);
+}
+
+float ANPCCharacter::GetCharisma() const
+{
+	return PlayerStats->GetCharisma();
+}
+
+void ANPCCharacter::SetCharisma(float Value)
+{
+	PlayerStats->SetCharisma(Value);
 }

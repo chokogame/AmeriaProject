@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "NPC/Status/UnitStats.h"
 #include "Logging/LogMacros.h"
+#include "Action/ActionCharaInterface.h"
+#include "Action/ActionBase.h"
 #include "ProjectAmeriaCharacter.generated.h"
 
 class USpringArmComponent;
@@ -17,7 +19,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AProjectAmeriaCharacter : public ACharacter
+class AProjectAmeriaCharacter : public ACharacter, public IActionCharaInterface
 {
 	GENERATED_BODY()
 
@@ -52,10 +54,31 @@ class AProjectAmeriaCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ToggleModeAction;
 
+	// AttackAction
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* AttackAction;
+
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+		void AddAction(TSubclassOf<UActionBase> ActionClass);
+
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+		void RemoveAction(TSubclassOf<UActionBase> ActionClass);
+
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+	void Attack(const FInputActionValue& Value);
+
 public:
 	AProjectAmeriaCharacter();
 
-	float GetCurrentActionPoints() const;
+/// <summary>
+/// アクション関連関数群
+/// </summary>
+public:
+	virtual void ExecuteAction(UActionBase* Action) override;
+	virtual float GetCurrentActionPoints() const override;
+	/** 行動力を減少させる */
+	virtual void DecreaseActionPoints(float Amount) override;
+
 	void SetCurrentActionPoints(float Points);
 	float GetMaxActionPoints() const;
 	void SetMaxActionPoints(float Points);
@@ -63,8 +86,39 @@ public:
 	/** ターン遷移を呼び出す入力関数 */
 	void NextTurn();
 
+	/** 現在セットされているアクション */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actions")
+		TArray<TSubclassOf<UActionBase>> ActionSlots;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	UUnitStats* PlayerStats;
+
+	virtual void TakeDamage(float Damage) override;
+
+	virtual float GetStrength() const override;
+	virtual void SetStrength(float Value) override;
+	virtual float GetMagicPower() const override;
+	virtual void SetMagicPower(float Value) override;
+	virtual float GetDefense() const override;
+	virtual void SetDefense(float Value) override;
+	virtual float GetResistance() const override;
+	virtual void SetResistance(float Value) override;
+
+	virtual float GetHealth() const override;
+	virtual void SetHealth(float Value) override;
+	virtual float GetMana() const override;
+	virtual void SetMana(float Value) override;
+	virtual float GetEndurance() const override;
+	virtual void SetEndurance(float Value) override;
+	virtual float GetAgility() const override;
+	virtual void SetAgility(float Value) override;
+	virtual float GetDexterity() const override;
+	virtual void SetDexterity(float Value) override;
+	virtual float GetIntelligence() const override;
+	virtual void SetIntelligence(float Value) override;
+	virtual float GetCharisma() const override;
+	virtual void SetCharisma(float Value) override;
+
 	
 
 protected:
@@ -75,9 +129,6 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 			
-	/** 行動力を減少させる */
-	void DecreaseActionPoints(float Amount);
-
 	/** 行動できるかどうかをチェックする */
 	bool CanAct() const;
 
@@ -106,6 +157,7 @@ private:
 		float CurrentActionPoints;
 
 	bool IsTurnBasedMode() const;
+
 
 };
 

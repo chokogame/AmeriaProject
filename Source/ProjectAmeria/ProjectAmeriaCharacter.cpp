@@ -12,6 +12,8 @@
 #include "InputActionValue.h"
 #include "ProjectAmeriaGameMode.h"
 #include <Kismet/GameplayStatics.h>
+#include "UObject/ConstructorHelpers.h"
+#include "UObject/UObjectGlobals.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -97,8 +99,12 @@ void AProjectAmeriaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 		// Next Turn
 		EnhancedInputComponent->BindAction(NextTurnAction, ETriggerEvent::Started, this, &AProjectAmeriaCharacter::NextTurn);
-
+		// Toggle Game Mode
 		EnhancedInputComponent->BindAction(ToggleModeAction, ETriggerEvent::Started, this, &AProjectAmeriaCharacter::ToggleGameMode);
+
+		// Attack Action
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AProjectAmeriaCharacter::Attack);
+
 	}
 	else
 	{
@@ -163,6 +169,14 @@ void AProjectAmeriaCharacter::DecreaseActionPoints(float Amount)
 	}
 }
 
+void AProjectAmeriaCharacter::ExecuteAction(UActionBase* Action)
+{
+	if (Action && CurrentActionPoints >= Action->GetActionPointCost())
+	{
+		Action->ExecuteAction(this);
+	}
+}
+
 bool AProjectAmeriaCharacter::CanAct() const
 {
 	return CurrentActionPoints > 0.0f;
@@ -204,6 +218,34 @@ void AProjectAmeriaCharacter::ToggleGameMode()
 	}
 }
 
+void AProjectAmeriaCharacter::AddAction(TSubclassOf<UActionBase> ActionClass)
+{
+	if (*ActionClass)
+	{
+		ActionSlots.Add(ActionClass);
+	}
+}
+
+void AProjectAmeriaCharacter::RemoveAction(TSubclassOf<UActionBase> ActionClass)
+{
+	if (*ActionClass)
+	{
+		ActionSlots.Remove(ActionClass);
+	}
+}
+
+void AProjectAmeriaCharacter::Attack(const FInputActionValue& Value)
+{
+	int32 ActionIndex = 0; // 例: アクションスロットの最初のアクションを使用する
+	if (ActionSlots.IsValidIndex(ActionIndex))
+	{
+		UActionBase* Action = NewObject<UActionBase>(this, ActionSlots[ActionIndex]);
+		if (Action)
+		{
+			ExecuteAction(Action);
+		}
+	}
+}
 bool AProjectAmeriaCharacter::IsTurnBasedMode() const
 {
 	if (const AProjectAmeriaGameMode* GameMode = Cast<AProjectAmeriaGameMode>(UGameplayStatics::GetGameMode(this)))
@@ -211,4 +253,120 @@ bool AProjectAmeriaCharacter::IsTurnBasedMode() const
 		return GameMode->IsTurnBasedMode();
 	}
 	return false;
+}
+
+void AProjectAmeriaCharacter::TakeDamage(float Damage)
+{
+	float NewHealth = FMath::Max(0.0f, PlayerStats->GetHealth() - Damage);
+	PlayerStats->SetHealth(NewHealth);
+}
+
+float AProjectAmeriaCharacter::GetStrength() const
+{
+	return PlayerStats->GetStrength();
+}
+
+void AProjectAmeriaCharacter::SetStrength(float Value)
+{
+	PlayerStats->SetStrength(Value);
+}
+
+float AProjectAmeriaCharacter::GetMagicPower() const
+{
+	return PlayerStats->GetMagicPower();
+}
+
+void AProjectAmeriaCharacter::SetMagicPower(float Value)
+{
+	PlayerStats->SetMagicPower(Value);
+}
+
+float AProjectAmeriaCharacter::GetDefense() const
+{
+	return PlayerStats->GetEndurance();
+}
+
+void AProjectAmeriaCharacter::SetDefense(float Value)
+{
+	PlayerStats->SetEndurance(Value);
+}
+
+float AProjectAmeriaCharacter::GetResistance() const
+{
+	return PlayerStats->GetMagicResistance();
+}
+
+void AProjectAmeriaCharacter::SetResistance(float Value)
+{
+	PlayerStats->SetMagicResistance(Value);
+}
+
+float AProjectAmeriaCharacter::GetHealth() const
+{
+	return PlayerStats->GetHealth();
+}
+
+void AProjectAmeriaCharacter::SetHealth(float Value)
+{
+	PlayerStats->SetHealth(Value);
+}
+
+float AProjectAmeriaCharacter::GetMana() const
+{
+	return PlayerStats->GetMana();
+}
+
+void AProjectAmeriaCharacter::SetMana(float Value)
+{
+	PlayerStats->SetMana(Value);
+}
+
+float AProjectAmeriaCharacter::GetEndurance() const
+{
+	return PlayerStats->GetEndurance();
+}
+
+void AProjectAmeriaCharacter::SetEndurance(float Value)
+{
+	PlayerStats->SetEndurance(Value);
+}
+
+float AProjectAmeriaCharacter::GetAgility() const
+{
+	return PlayerStats->GetAgility();
+}
+
+void AProjectAmeriaCharacter::SetAgility(float Value)
+{
+	PlayerStats->SetAgility(Value);
+}
+
+float AProjectAmeriaCharacter::GetDexterity() const
+{
+	return PlayerStats->GetDexterity();
+}
+
+void AProjectAmeriaCharacter::SetDexterity(float Value)
+{
+	PlayerStats->SetDexterity(Value);
+}
+
+float AProjectAmeriaCharacter::GetIntelligence() const
+{
+	return PlayerStats->GetIntelligence();
+}
+
+void AProjectAmeriaCharacter::SetIntelligence(float Value)
+{
+	PlayerStats->SetIntelligence(Value);
+}
+
+float AProjectAmeriaCharacter::GetCharisma() const
+{
+	return PlayerStats->GetCharisma();
+}
+
+void AProjectAmeriaCharacter::SetCharisma(float Value)
+{
+	PlayerStats->SetCharisma(Value);
 }
