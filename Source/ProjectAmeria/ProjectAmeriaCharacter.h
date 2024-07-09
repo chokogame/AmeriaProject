@@ -93,7 +93,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	UUnitStats* PlayerStats;
 
-	virtual void TakeDamage(float Damage) override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	virtual float GetStrength() const override;
 	virtual void SetStrength(float Value) override;

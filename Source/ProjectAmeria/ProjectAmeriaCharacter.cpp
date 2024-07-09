@@ -255,10 +255,27 @@ bool AProjectAmeriaCharacter::IsTurnBasedMode() const
 	return false;
 }
 
-void AProjectAmeriaCharacter::TakeDamage(float Damage)
+
+float AProjectAmeriaCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	float NewHealth = FMath::Max(0.0f, PlayerStats->GetHealth() - Damage);
-	PlayerStats->SetHealth(NewHealth);
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (ActualDamage > 0.0f)
+	{
+		float NewHealth = FMath::Max(0.0f, PlayerStats->GetHealth() - ActualDamage);
+		PlayerStats->SetHealth(NewHealth);
+
+		UE_LOG(LogTemp, Log, TEXT("%s : HP = %f"), *GetName(), PlayerStats->GetHealth());
+
+		// Additional logic for when the character takes damage
+		if (NewHealth <= 0)
+		{
+			// Handle character death
+			UE_LOG(LogTemp, Log, TEXT("%s has died"), *GetName());
+		}
+	}
+
+	return ActualDamage;
 }
 
 float AProjectAmeriaCharacter::GetStrength() const

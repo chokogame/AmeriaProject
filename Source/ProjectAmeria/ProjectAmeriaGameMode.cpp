@@ -230,7 +230,7 @@ void AProjectAmeriaGameMode::UpdateActionPointsUI()
                 FString ActionPointsString = FString::Printf(TEXT("Player AP: %d"), static_cast<int32>(PlayerCharacter->GetCurrentActionPoints()));
                 ActionPointsText->SetText(FText::FromString(ActionPointsString));
             }
-            UE_LOG(LogTemp, Log, TEXT("Player Action Points Widget position set to: X=%f, Y=%f"), CurrentPosition.X, CurrentPosition.Y);
+           // UE_LOG(LogTemp, Log, TEXT("Player Action Points Widget position set to: X=%f, Y=%f"), CurrentPosition.X, CurrentPosition.Y);
         }
         CurrentPosition += WidgetOffset;
     }
@@ -271,7 +271,7 @@ void AProjectAmeriaGameMode::UpdateActionPointsUI()
                 }
                 ActionPointsText->SetText(FText::FromString(ActionPointsString));
             }
-            UE_LOG(LogTemp, Log, TEXT("NPC Action Points Widget position set to: X=%f, Y=%f"), CurrentPosition.X, CurrentPosition.Y);
+         //   UE_LOG(LogTemp, Log, TEXT("NPC Action Points Widget position set to: X=%f, Y=%f"), CurrentPosition.X, CurrentPosition.Y);
         }
         CurrentPosition += WidgetOffset;
     }
@@ -285,7 +285,7 @@ void AProjectAmeriaGameMode::UpdateTextBlockPosition(UTextBlock* TextBlock, FVec
         if (CanvasSlot)
         {
             CanvasSlot->SetPosition(Position);
-            UE_LOG(LogTemp, Log, TEXT("TextBlock position set to: X=%f, Y=%f"), Position.X, Position.Y);
+        //    UE_LOG(LogTemp, Log, TEXT("TextBlock position set to: X=%f, Y=%f"), Position.X, Position.Y);
         }
         else
         {

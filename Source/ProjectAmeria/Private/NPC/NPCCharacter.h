@@ -71,6 +71,8 @@ private:
 		float CurrentActionPoints;
 
 public:
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 	virtual float GetStrength() const override;
 	virtual void SetStrength(float Value) override;
 	virtual float GetMagicPower() const override;

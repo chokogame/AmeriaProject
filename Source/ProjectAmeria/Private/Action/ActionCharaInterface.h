@@ -50,6 +50,4 @@ public:
     virtual float GetCharisma() const = 0;
     virtual void SetCharisma(float Value) = 0;
 
-    // ƒ_ƒ[ƒW‚ğó‚¯æ‚é‚½‚ß‚ÌŠÖ”
-    virtual void TakeDamage(float Damage) = 0;
 };

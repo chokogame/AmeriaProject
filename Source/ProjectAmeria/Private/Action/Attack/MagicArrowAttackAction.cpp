@@ -29,6 +29,8 @@ void UMagicArrowAttackAction::ExecuteAction(AActor* Executor)
             FVector StartLocation = Executor->GetActorLocation();
             FVector ForwardVector = Executor->GetActorForwardVector();
             FVector EndLocation = StartLocation + (ForwardVector * ProjectileRange);
+            // デバッグ表示：トレースの開始位置と終了位置をログに表示
+            UE_LOG(LogTemp, Log, TEXT("Tracing from %s to %s"), *StartLocation.ToString(), *EndLocation.ToString());
             
             // デバッグ表示：トレースのラインを描画
             DrawDebugLine(Executor->GetWorld(), StartLocation, EndLocation, FColor::Green, true, -1.0f, 0, 5.0f);
@@ -37,17 +39,19 @@ void UMagicArrowAttackAction::ExecuteAction(AActor* Executor)
             FCollisionQueryParams CollisionParams;
             CollisionParams.AddIgnoredActor(Executor);
 
-            if (Executor->GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, CollisionParams))
+            if (Executor->GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Pawn, CollisionParams))
             {
+
                 // デバッグ表示：ヒットした場所にポイントを描画
                 DrawDebugPoint(Executor->GetWorld(), HitResult.Location, 10.0f, FColor::Red, true, -1.0f);
                 if (AActor* HitActor = HitResult.GetActor())
                 {
-                    float Damage = UNPCUtility::CalculateDamage(Executor, HitActor, BasePower, DamageMultiplier, bIsMagicAttack);
+                    UE_LOG(LogTemp, Log, TEXT("Hit Actor: %s"), *HitActor->GetFName().ToString());
+                    float Damage = 0.0f; 
 
                     if (IActionCharaInterface* Character = Cast<IActionCharaInterface>(Executor))
                     {
-                        Damage = Character->GetCurrentActionPoints() * DamageMultiplier;
+                        Damage = UNPCUtility::CalculateDamage(Executor, HitActor, BasePower, DamageMultiplier, bIsMagicAttack);
                     }
 
                     UGameplayStatics::ApplyDamage(HitActor, Damage, Executor->GetInstigatorController(), Executor, nullptr);
