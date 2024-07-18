@@ -5,7 +5,11 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "Action/ActionBase.h"
+#include "AmeriaDefine.h"
 #include "ActionCharaInterface.generated.h"
+
+// 前方宣言
+class UUnitStats;
 
 /**
  * プレイヤーとNPCが同じアクションを行うためのインターフェース
@@ -21,33 +25,22 @@ class PROJECTAMERIA_API IActionCharaInterface
     GENERATED_BODY()
 
 public:
+    /** アクションを実行するメソッド */
     virtual void ExecuteAction(UActionBase* Action) = 0;
+
+    /** 現在の行動力を取得するメソッド */
     virtual float GetCurrentActionPoints() const = 0;
+
+    /** 行動力を減少させるメソッド */
     virtual void DecreaseActionPoints(float Amount) = 0;
 
-    //ステータス関連
-    // ステータス取得の関数
-    virtual float GetStrength() const = 0;
-    virtual void SetStrength(float Value) = 0;
-    virtual float GetMagicPower() const = 0;
-    virtual void SetMagicPower(float Value) = 0;
-    virtual float GetDefense() const = 0;
-    virtual void SetDefense(float Value) = 0;
-    virtual float GetResistance() const = 0;
-    virtual void SetResistance(float Value) = 0;
-    virtual float GetHealth() const = 0;
-    virtual void SetHealth(float Value) = 0;
-    virtual float GetMana() const = 0;
-    virtual void SetMana(float Value) = 0;
-    virtual float GetEndurance() const = 0;
-    virtual void SetEndurance(float Value) = 0;
-    virtual float GetAgility() const = 0;
-    virtual void SetAgility(float Value) = 0;
-    virtual float GetDexterity() const = 0;
-    virtual void SetDexterity(float Value) = 0;
-    virtual float GetIntelligence() const = 0;
-    virtual void SetIntelligence(float Value) = 0;
-    virtual float GetCharisma() const = 0;
-    virtual void SetCharisma(float Value) = 0;
+    /** ステータスを取得するメソッド */
+    virtual UUnitStats* GetPlayerStats() const = 0;  // ステータスへのアクセスメソッド
 
+    /** 所属を取得するメソッド */
+    virtual EAffiliation GetAffiliation() const = 0;
+
+    /** 所属を設定するメソッド */
+    virtual void SetAffiliation(EAffiliation NewAffiliation) = 0;
 };
+

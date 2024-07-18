@@ -42,7 +42,7 @@ public:
     UMaterialInterface* PointerDecalMaterial; // ポインタとして表示するデカール素材
 
    // virtual void ExecuteAction(AProjectAmeriaCharacter* Character) override;
-    virtual void ExecuteAction(AActor* Executor) override;
+    virtual void ExecuteAction(AActor* Executor, AActor* Target) override;
     virtual float GetActionPointCost() const override;
 
 };

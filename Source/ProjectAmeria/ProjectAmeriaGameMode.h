@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Blueprint/UserWidget.h"
-#include "Components/TextBlock.h"
+#include "UI/ProjectAmeriaHUD.h"
 #include "ProjectAmeriaGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -19,51 +18,39 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override; // Tick関数のオーバーライド
 
+    /** ターン変更処理 */
     void ToggleGameMode();  // モード切り替え用メソッド
-
     void StartTurn();
     void NextTurn();
     void EndTurn();
-
     bool IsTurnBasedMode() const { return bIsTurnBasedMode; }
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-        TSubclassOf<UUserWidget> TurnInfoWidgetClass;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-        TSubclassOf<UUserWidget> ActionPointsWidgetClass;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-        FVector2D InitialWidgetPosition;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-        FVector2D WidgetOffset;
-
     void HandlePlayerTurn();
 private:
     void HandleAllyNPCTurn();
     void HandleEnemyNPCTurn();
-
     bool bIsTurnBasedMode;
-    bool bCanEndTurn;  // ターン終了可能かどうかを示すフラグ
-
-    enum ETurnState
-    {
-        PlayerTurn,
-        AllyNPCTurn,
-        EnemyNPCTurn
-    };
+    bool bCanEndTurn;// ターン終了可能かどうかを示すフラグ
 
     ETurnState CurrentTurnState;
-    void UpdateTurnInfoUI();
-    void UpdateActionPointsUI();
-    void UpdateTextBlockPosition(UTextBlock* TextBlock, FVector2D Position);
 
-    UPROPERTY()
-        UUserWidget* TurnInfoWidget;
+///キャラクター情報関連
+public:
+     // 全キャラクターのリストを初期化する関数
+    void InitializeCharacters();
 
+    // 全キャラクターのリストを取得する関数
+    const TArray<AActor*>& GetAllCharacters() const;
+
+
+private:
     UPROPERTY()
-      TMap<ACharacter*, UUserWidget*> ActionPointsWidgets;
+    TArray<AActor*> AllCharacters;
+
+    /// <summary>
+    /// UI関係
+    /// </summary>
+public:
+    AProjectAmeriaHUD* GetProjectAmeriaHUD() const;
 };
 
 

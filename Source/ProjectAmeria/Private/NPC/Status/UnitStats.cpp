@@ -18,6 +18,18 @@ UUnitStats::UUnitStats()
     Charisma = 10.0f;
 }
 
+// 名前のゲッター
+FString UUnitStats::GetName() const
+{
+    return Name;
+}
+
+// 名前のセッター
+void UUnitStats::SetName(FString Value)
+{
+    Name = Value;
+}
+
 // Healthのゲッター
 float UUnitStats::GetHealth() const
 {
@@ -42,109 +54,109 @@ void UUnitStats::SetMana(float Value)
     Mana = Value;
 }
 
-// ActionPointsのゲッター
+// 行動力のゲッター
 float UUnitStats::GetActionPoints() const
 {
     return ActionPoints;
 }
 
-// ActionPointsのセッター
+// 行動力のセッター
 void UUnitStats::SetActionPoints(float Value)
 {
     ActionPoints = Value;
 }
 
-// Strengthのゲッター
+// 筋力のゲッター
 float UUnitStats::GetStrength() const
 {
     return Strength;
 }
 
-// Strengthのセッター
+// 筋力のセッター
 void UUnitStats::SetStrength(float Value)
 {
     Strength = Value;
 }
 
-// Enduranceのゲッター
+// 耐久力のゲッター
 float UUnitStats::GetEndurance() const
 {
     return Endurance;
 }
 
-// Enduranceのセッター
+// 耐久力のセッター
 void UUnitStats::SetEndurance(float Value)
 {
     Endurance = Value;
 }
 
-// MagicPowerのゲッター
+// 魔力のゲッター
 float UUnitStats::GetMagicPower() const
 {
     return MagicPower;
 }
 
-// MagicPowerのセッター
+// 魔力のセッター
 void UUnitStats::SetMagicPower(float Value)
 {
     MagicPower = Value;
 }
 
-// MagicResistanceのゲッター
+// 魔法防御力のゲッター
 float UUnitStats::GetMagicResistance() const
 {
     return MagicResistance;
 }
 
-// MagicResistanceのセッター
+// 魔法防御力のセッター
 void UUnitStats::SetMagicResistance(float Value)
 {
     MagicResistance = Value;
 }
 
-// Agilityのゲッター
+// 俊敏性のゲッター
 float UUnitStats::GetAgility() const
 {
     return Agility;
 }
 
-// Agilityのセッター
+// 俊敏性のセッター
 void UUnitStats::SetAgility(float Value)
 {
     Agility = Value;
 }
 
-// Dexterityのゲッター
+// 器用さのゲッター
 float UUnitStats::GetDexterity() const
 {
     return Dexterity;
 }
 
-// Dexterityのセッター
+// 器用さのセッター
 void UUnitStats::SetDexterity(float Value)
 {
     Dexterity = Value;
 }
 
-// Intelligenceのゲッター
+// 知力のゲッター
 float UUnitStats::GetIntelligence() const
 {
     return Intelligence;
 }
 
-// Intelligenceのセッター
+// 知力のセッター
 void UUnitStats::SetIntelligence(float Value)
 {
     Intelligence = Value;
 }
 
-// Charismaのゲッター
+// 魅力のゲッター
 float UUnitStats::GetCharisma() const
 {
     return Charisma;
 }
 
-// Charismaのセッター
+// 魅力のセッター
 void UUnitStats::SetCharisma(float Value)
 {
     Charisma = Value;

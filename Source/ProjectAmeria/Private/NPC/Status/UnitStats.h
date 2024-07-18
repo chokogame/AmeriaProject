@@ -12,106 +12,115 @@ class PROJECTAMERIA_API UUnitStats : public UActorComponent
     GENERATED_BODY()
 
 public:
-    // コンストラクタ
+    /** コンストラクタ */
     UUnitStats();
 
-    // Healthのゲッター
+    /** 名前のゲッター */
+    FString GetName() const;
+    /** 名前のセッター */
+    void SetName(FString Value);
+
+    /** Healthのゲッター */
     float GetHealth() const;
-    // Healthのセッター
+    /** Healthのセッター */
     void SetHealth(float Value);
 
-    // Manaのゲッター
+    /** Manaのゲッター */
     float GetMana() const;
-    // Manaのセッター
+    /** Manaのセッター */
     void SetMana(float Value);
 
-    // ActionPointsのゲッター
+    /** 行動力のゲッター */
     float GetActionPoints() const;
-    // ActionPointsのセッター
+    /** 行動力のセッター */
     void SetActionPoints(float Value);
 
-    // Strengthのゲッター
+    /** 筋力のゲッター */
     float GetStrength() const;
-    // Strengthのセッター
+    /** 筋力のセッター */
     void SetStrength(float Value);
 
-    // Enduranceのゲッター
+    /** 耐久力のゲッター */
     float GetEndurance() const;
-    // Enduranceのセッター
+    /** 耐久力のセッター */
     void SetEndurance(float Value);
 
-    // MagicPowerのゲッター
+    /** 魔力のゲッター */
     float GetMagicPower() const;
-    // MagicPowerのセッター
+    /** 魔力のセッター */
     void SetMagicPower(float Value);
 
-    // MagicResistanceのゲッター
+    /** 魔法防御力のゲッター */
     float GetMagicResistance() const;
-    // MagicResistanceのセッター
+    /** 魔法防御力のセッター */
     void SetMagicResistance(float Value);
 
-    // Agilityのゲッター
+    /** 俊敏性のゲッター */
     float GetAgility() const;
-    // Agilityのセッター
+    /** 俊敏性のセッター */
     void SetAgility(float Value);
 
-    // Dexterityのゲッター
+    /** 器用さのゲッター */
     float GetDexterity() const;
-    // Dexterityのセッター
+    /** 器用さのセッター */
     void SetDexterity(float Value);
 
-    // Intelligenceのゲッター
+    /** 知力のゲッター */
     float GetIntelligence() const;
-    // Intelligenceのセッター
+    /** 知力のセッター */
     void SetIntelligence(float Value);
 
-    // Charismaのゲッター
+    /** 魅力のゲッター */
     float GetCharisma() const;
-    // Charismaのセッター
+    /** 魅力のセッター */
     void SetCharisma(float Value);
 
 protected:
-    // Health（健康）
+    /** 名前 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
+        FString Name;
+
+    /** 健康 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float Health;
 
-    // Mana（魔力）
+    /** 魔力 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float Mana;
 
-    // ActionPoints（行動力）
+    /** 行動力 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float ActionPoints;
 
-    // Strength（筋力）
+    /** 筋力 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float Strength;
 
-    // Endurance（耐久）
+    /** 耐久力 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float Endurance;
 
-    // MagicPower（魔力）
+    /** 魔力 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float MagicPower;
 
-    // MagicResistance（魔法防御）
+    /** 魔法防御力 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float MagicResistance;
 
-    // Agility（俊敏）
+    /** 俊敏性 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float Agility;
 
-    // Dexterity（器用）
+    /** 器用さ */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float Dexterity;
 
-    // Intelligence（知力）
+    /** 知力 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float Intelligence;
 
-    // Charisma（魅力）
+    /** 魅力 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
         float Charisma;
 };

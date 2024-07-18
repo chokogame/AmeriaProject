@@ -1,5 +1,7 @@
 #include "NPCUtility.h"
 #include "NPCCharacter.h"  // ここでNPCCharacterをインクルード
+#include "ProjectAmeria/ProjectAmeriaGameMode.h"
+#include "Kismet/GameplayStatics.h"
 
 void UNPCUtility::ChangeNPCsAffiliation(AActor* NPCActor, EAffiliation NewAffiliation)
 {
@@ -29,8 +31,8 @@ float UNPCUtility::CalculateDamage(AActor* Attacker, AActor* Defender, float Bas
         return 0.0f;
     }
 
-    float AttackPower = bIsMagicAttack ? AttackerInterface->GetMagicPower() : AttackerInterface->GetStrength();
-    float DefensePower = bIsMagicAttack ? DefenderInterface->GetResistance() : DefenderInterface->GetDefense();
+    float AttackPower = bIsMagicAttack ? AttackerInterface->GetPlayerStats()->GetMagicPower() : AttackerInterface->GetPlayerStats()->GetStrength();
+    float DefensePower = bIsMagicAttack ? DefenderInterface->GetPlayerStats()->GetMagicResistance() : DefenderInterface->GetPlayerStats()->GetEndurance();
 
     float Damage = (BasePower + (AttackPower * Multiplier)) - DefensePower;
     Damage = FMath::Max(0.0f, Damage); // ダメージがマイナスにならないようにする
@@ -41,4 +43,35 @@ float UNPCUtility::CalculateDamage(AActor* Attacker, AActor* Defender, float Bas
     UE_LOG(LogTemp, Log, TEXT("Calculated Damage: %f"), Damage);
 
     return Damage;
+}
+
+//　キャラリストを取得
+const TArray<AActor*>& UNPCUtility::GetAllCharacters(UObject* WorldContextObject)
+{
+    if (AProjectAmeriaGameMode* GameMode = Cast<AProjectAmeriaGameMode>(UGameplayStatics::GetGameMode(WorldContextObject)))
+    {
+        return GameMode->GetAllCharacters();
+    }
+
+    static TArray<AActor*> EmptyArray;
+    return EmptyArray;
+}
+
+//　次のキャラを取得
+AActor* UNPCUtility::GetNextCharacterByIndex(UObject* WorldContextObject, int32 CurrentIndex)
+{
+    if (AProjectAmeriaGameMode* GameMode = Cast<AProjectAmeriaGameMode>(UGameplayStatics::GetGameMode(WorldContextObject)))
+    {
+        const TArray<AActor*>& AllCharacters = GameMode->GetAllCharacters();
+
+        if (AllCharacters.Num() == 0)
+        {
+            return nullptr;
+        }
+
+        int32 NextIndex = (CurrentIndex + 1) % AllCharacters.Num();
+        return AllCharacters.IsValidIndex(NextIndex) ? AllCharacters[NextIndex] : nullptr;
+    }
+
+    return nullptr;
 }

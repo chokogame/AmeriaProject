@@ -6,16 +6,9 @@
 #include "GameFramework/Character.h"
 #include "NPC/Status/UnitStats.h"
 #include "Action/ActionBase.h"
+#include "AmeriaDefine.h"
 #include "Action/ActionCharaInterface.h"
 #include "NPCCharacter.generated.h"
-
-UENUM(BlueprintType)
-enum class EAffiliation : uint8
-{
-	Neutral UMETA(DisplayName = "Neutral"),
-	Ally UMETA(DisplayName = "Ally"),
-	Enemy UMETA(DisplayName = "Enemy")
-};
 
 UCLASS()
 class ANPCCharacter : public ACharacter, public IActionCharaInterface
@@ -45,7 +38,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Affiliation")
 	EAffiliation Affiliation;
 
-	void SetAffiliation(EAffiliation NewAffiliation);
+	void SetAffiliation(EAffiliation NewAffiliation) override;
+
+	EAffiliation GetAffiliation() const override;
+
+	UUnitStats* GetPlayerStats() const { return PlayerStats; }
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -72,29 +69,5 @@ private:
 
 public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
-	virtual float GetStrength() const override;
-	virtual void SetStrength(float Value) override;
-	virtual float GetMagicPower() const override;
-	virtual void SetMagicPower(float Value) override;
-	virtual float GetDefense() const override;
-	virtual void SetDefense(float Value) override;
-	virtual float GetResistance() const override;
-	virtual void SetResistance(float Value) override;
-
-	virtual float GetHealth() const override;
-	virtual void SetHealth(float Value) override;
-	virtual float GetMana() const override;
-	virtual void SetMana(float Value) override;
-	virtual float GetEndurance() const override;
-	virtual void SetEndurance(float Value) override;
-	virtual float GetAgility() const override;
-	virtual void SetAgility(float Value) override;
-	virtual float GetDexterity() const override;
-	virtual void SetDexterity(float Value) override;
-	virtual float GetIntelligence() const override;
-	virtual void SetIntelligence(float Value) override;
-	virtual float GetCharisma() const override;
-	virtual void SetCharisma(float Value) override;
 
 };

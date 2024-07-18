@@ -1,17 +1,15 @@
 #include "ActionBase.h"
 #include "../ProjectAmeriaCharacter.h"
+#include <UI/ProjectAmeriaHUD.h>
+#include <Kismet/GameplayStatics.h>
 
-void UActionBase::ExecuteAction(AActor* Executor)
+void UActionBase::ExecuteAction(AActor* Executor, AActor* Target /*= nullptr*/)
 {
-    if (IActionCharaInterface* Executable = Cast<IActionCharaInterface>(Executor))
-    {
-        if (Executable->GetCurrentActionPoints() >= GetActionPointCost())
-        {
-            // アクションの実行ロジック
-            Executable->DecreaseActionPoints(GetActionPointCost());
-        }
-    }
-}
+    // 派生クラスがこの関数をオーバーライドする必要があります。
+    // デリゲートを発火
+    OnActionExecuted.Broadcast(Executor, Target);
+
+ }
 
 float UActionBase::GetActionPointCost() const
 {

@@ -8,6 +8,7 @@
 #include "Logging/LogMacros.h"
 #include "Action/ActionCharaInterface.h"
 #include "Action/ActionBase.h"
+#include "AmeriaDefine.h"
 #include "ProjectAmeriaCharacter.generated.h"
 
 class USpringArmComponent;
@@ -18,146 +19,157 @@ struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
-UCLASS(config=Game)
+UCLASS(config = Game)
 class AProjectAmeriaCharacter : public ACharacter, public IActionCharaInterface
 {
-	GENERATED_BODY()
-
-	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* CameraBoom;
-
-	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FollowCamera;
-	
-	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputMappingContext* DefaultMappingContext;
-
-	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* JumpAction;
-
-	/** Move Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* MoveAction;
-
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* LookAction;
-
-	/** Next Turn Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* NextTurnAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* ToggleModeAction;
-
-	// AttackAction
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* AttackAction;
-
-	UFUNCTION(BlueprintCallable, Category = "Actions")
-		void AddAction(TSubclassOf<UActionBase> ActionClass);
-
-	UFUNCTION(BlueprintCallable, Category = "Actions")
-		void RemoveAction(TSubclassOf<UActionBase> ActionClass);
-
-	UFUNCTION(BlueprintCallable, Category = "Actions")
-	void Attack(const FInputActionValue& Value);
+    GENERATED_BODY()
 
 public:
-	AProjectAmeriaCharacter();
+    AProjectAmeriaCharacter();
 
-/// <summary>
-/// アクション関連関数群
-/// </summary>
-public:
-	virtual void ExecuteAction(UActionBase* Action) override;
-	virtual float GetCurrentActionPoints() const override;
-	/** 行動力を減少させる */
-	virtual void DecreaseActionPoints(float Amount) override;
+    /** 毎フレーム呼ばれる関数 */
+    virtual void Tick(float DeltaTime) override;
 
-	void SetCurrentActionPoints(float Points);
-	float GetMaxActionPoints() const;
-	void SetMaxActionPoints(float Points);
+    /** 入力機能をバインドする関数 */
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	/** ターン遷移を呼び出す入力関数 */
-	void NextTurn();
+    /** プレイ開始時に呼ばれる関数 */
+    virtual void BeginPlay() override;
 
-	/** 現在セットされているアクション */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actions")
-		TArray<TSubclassOf<UActionBase>> ActionSlots;
+    /** アクションを実行する関数 */
+    virtual void ExecuteAction(UActionBase* Action) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	UUnitStats* PlayerStats;
+    /** 現在の行動力を取得する関数 */
+    virtual float GetCurrentActionPoints() const override;
 
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+    /** 行動力を減少させる関数 */
+    virtual void DecreaseActionPoints(float Amount) override;
 
-	virtual float GetStrength() const override;
-	virtual void SetStrength(float Value) override;
-	virtual float GetMagicPower() const override;
-	virtual void SetMagicPower(float Value) override;
-	virtual float GetDefense() const override;
-	virtual void SetDefense(float Value) override;
-	virtual float GetResistance() const override;
-	virtual void SetResistance(float Value) override;
+    /** ダメージを受ける関数 */
+    virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-	virtual float GetHealth() const override;
-	virtual void SetHealth(float Value) override;
-	virtual float GetMana() const override;
-	virtual void SetMana(float Value) override;
-	virtual float GetEndurance() const override;
-	virtual void SetEndurance(float Value) override;
-	virtual float GetAgility() const override;
-	virtual void SetAgility(float Value) override;
-	virtual float GetDexterity() const override;
-	virtual void SetDexterity(float Value) override;
-	virtual float GetIntelligence() const override;
-	virtual void SetIntelligence(float Value) override;
-	virtual float GetCharisma() const override;
-	virtual void SetCharisma(float Value) override;
+    /** UIアクションメソッド */
+    UFUNCTION(BlueprintCallable, Category = "Actions")
+        void AddAction(TSubclassOf<UActionBase> ActionClass);
 
-	
+    UFUNCTION(BlueprintCallable, Category = "Actions")
+        void RemoveAction(TSubclassOf<UActionBase> ActionClass);
+
+    UFUNCTION(BlueprintCallable, Category = "Actions")
+        void Attack(const FInputActionValue& Value);
+
+    /** 行動力のゲッターとセッター */
+    void SetCurrentActionPoints(float Points);
+    float GetMaxActionPoints() const;
+    void SetMaxActionPoints(float Points);
+
+    /** ターン遷移の入力関数 */
+    void NextTurn();
+
+    /** ステータスのゲッターとセッター */
+     // ステータスへのアクセスメソッド
+
+    UUnitStats* GetPlayerStats() const { return PlayerStats; }
+
+    /** 所属のゲッターとセッター */
+    virtual void SetAffiliation(EAffiliation NewAffiliation) override;
+    virtual EAffiliation GetAffiliation() const override;
+
+    /** ステート管理 */
+    FORCEINLINE EPlayerState GetCurrentState() const { return CurrentState; }
 
 protected:
+    /** 移動入力を処理する関数 */
+    void Move(const FInputActionValue& Value);
 
-	/** Called for movement input */
-	void Move(const FInputActionValue& Value);
+    /** 視点入力を処理する関数 */
+    void Look(const FInputActionValue& Value);
 
-	/** Called for looking input */
-	void Look(const FInputActionValue& Value);
-			
-	/** 行動できるかどうかをチェックする */
-	bool CanAct() const;
+    /** ゲームモードを切り替える関数 */
+    void ToggleGameMode();
 
-protected:
-	// APawn interface
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-	// To add mapping context
-	virtual void BeginPlay();
+    /** ターンベースモードかどうかをチェックする関数 */
+    bool IsTurnBasedMode() const;
 
-	void ToggleGameMode();  // モード切り替え用メソッド
+    /** キャラクターが行動可能かどうかをチェックする関数 */
+    bool CanAct() const;
 
-public:
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+    /** ステート変更を処理する関数 */
+    void HandleIdleState();
+    void HandleSelectingTargetState();
+    void HandleAttackingState();
+    void ChangeState(EPlayerState NewState);
+    void SelectTarget();
+    void ExecuteAttack();
+
+    /** アクションスロット */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actions")
+        TArray<TSubclassOf<UActionBase>> ActionSlots;
+
+    /** プレイヤーステータス */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+        UUnitStats* PlayerStats;
+
+    /** 所属 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Affiliation")
+        EAffiliation Affiliation;
+
+    /** 最大行動力 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action Points", meta = (AllowPrivateAccess = "true"))
+        float MaxActionPoints;
+
+    /** 現在の行動力 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action Points", meta = (AllowPrivateAccess = "true"))
+        float CurrentActionPoints;
 
 private:
-	/** 最大行動力 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action Points", meta = (AllowPrivateAccess = "true"))
-		float MaxActionPoints;
+    /** キャラクターの背後にカメラを配置するためのカメラブーム */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+        USpringArmComponent* CameraBoom;
 
-	/** 現在の行動力 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action Points", meta = (AllowPrivateAccess = "true"))
-		float CurrentActionPoints;
+    /** フォローカメラ */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+        UCameraComponent* FollowCamera;
 
-	bool IsTurnBasedMode() const;
+    /** マッピングコンテキスト */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+        UInputMappingContext* DefaultMappingContext;
 
+    /** 入力アクション */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+        UInputAction* JumpAction;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+        UInputAction* MoveAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+        UInputAction* LookAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+        UInputAction* NextTurnAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+        UInputAction* ToggleModeAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+        UInputAction* SelectTargetAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+        UInputAction* AttackAction;
+
+    /** プレイヤーの状態 */
+    EPlayerState CurrentState;
+
+    /** 現在のターゲット */
+    AActor* CurrentTarget;
+
+    /** ターゲット選択中のフラグ */
+    bool bIsSelectingTarget;
+
+public:
+    /** CameraBoomサブオブジェクトを返す関数 **/
+    FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
+    /** FollowCameraサブオブジェクトを返す関数 **/
+    FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };
-

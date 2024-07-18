@@ -14,6 +14,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "UObject/ConstructorHelpers.h"
 #include "UObject/UObjectGlobals.h"
+#include "Action/ActionUtility.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -22,20 +23,18 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 AProjectAmeriaCharacter::AProjectAmeriaCharacter()
 {
-	// Set size for collision capsule
+	// 衝突カプセルのサイズ設定
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
-	// Don't rotate when the controller rotates. Let that just affect the camera.
+
+	// コントローラーが回転してもキャラクターは回転しない
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
+	// キャラクターの移動設定
+	GetCharacterMovement()->bOrientRotationToMovement = true; // 入力方向にキャラクターが移動
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // この回転速度で移動
 
-	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
-	// instead of recompiling to adjust them
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
@@ -43,39 +42,76 @@ AProjectAmeriaCharacter::AProjectAmeriaCharacter()
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
-	// Create a camera boom (pulls in towards the player if there is a collision)
+	// カメラブームを作成（キャラクターの後ろにカメラを配置）
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
-	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	CameraBoom->TargetArmLength = 400.0f; // この距離でキャラクターの後ろにカメラを配置
+	CameraBoom->bUsePawnControlRotation = true; // コントローラーに基づいてアームを回転
 
-	// Create a follow camera
+	// フォローカメラを作成
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	FollowCamera->bUsePawnControlRotation = false; // カメラはアームに対して回転しない
 
 	// 行動力の初期値設定
 	MaxActionPoints = 10.0f;
 	CurrentActionPoints = MaxActionPoints;
 
+	// ステータスを定義
 	PlayerStats = CreateDefaultSubobject<UUnitStats>(TEXT("PlayerStats"));
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	// ステートマシンの初期化
+	CurrentState = EPlayerState::Idle;
+
+	// ターゲット選択関連の初期化
+	CurrentTarget = nullptr;
+	bIsSelectingTarget = false;
+}
+
+void AProjectAmeriaCharacter::SetAffiliation(EAffiliation NewAffiliation)
+{
+	//プレイヤーキャラはALLY固定
+	return;
+}
+
+EAffiliation AProjectAmeriaCharacter::GetAffiliation() const
+{
+	return EAffiliation::Ally;
 }
 
 void AProjectAmeriaCharacter::BeginPlay()
 {
-	// Call the base class  
+	// 親クラスのBeginPlayを呼び出す
 	Super::BeginPlay();
 }
+
+void AProjectAmeriaCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	switch (CurrentState)
+	{
+	case EPlayerState::Idle:
+		HandleIdleState();
+		break;
+	case EPlayerState::SelectingTarget:
+		HandleSelectingTargetState();
+		break;
+	case EPlayerState::Attacking:
+		HandleAttackingState();
+		break;
+	default:
+		break;
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // Input
 
 void AProjectAmeriaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	// Add Input Mapping Context
+	// 入力マッピングコンテキストを追加
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -84,26 +120,31 @@ void AProjectAmeriaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 		}
 	}
 	
-	// Set up action bindings
+	// アクションバインディングを設定
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		
-		// Jumping
+		// ジャンプ
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
-		// Moving
+		// 移動
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AProjectAmeriaCharacter::Move);
 
-		// Looking
+		// 視点操作
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AProjectAmeriaCharacter::Look);
 
-		// Next Turn
+		// 次のターン
 		EnhancedInputComponent->BindAction(NextTurnAction, ETriggerEvent::Started, this, &AProjectAmeriaCharacter::NextTurn);
-		// Toggle Game Mode
+
+		// ゲームモード切替
 		EnhancedInputComponent->BindAction(ToggleModeAction, ETriggerEvent::Started, this, &AProjectAmeriaCharacter::ToggleGameMode);
 
-		// Attack Action
+		// ターゲット選択アクション
+		EnhancedInputComponent->BindAction(SelectTargetAction, ETriggerEvent::Started, this, &AProjectAmeriaCharacter::SelectTarget);
+
+		// 攻撃アクション
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AProjectAmeriaCharacter::Attack);
+
 
 	}
 	else
@@ -114,22 +155,22 @@ void AProjectAmeriaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 void AProjectAmeriaCharacter::Move(const FInputActionValue& Value)
 {
-	// input is a Vector2D
+	// 入力はVector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr && (IsTurnBasedMode() ? CanAct() : true) && (MovementVector.X != 0.0f || MovementVector.Y != 0.0f))
 	{
-		// find out which way is forward
+		// 前方の方向を取得
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
+		// 前方ベクトルを取得
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	
-		// get right vector 
+		// 右方向ベクトルを取得
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// add movement 
+		// 移動を追加
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 
@@ -144,12 +185,12 @@ void AProjectAmeriaCharacter::Move(const FInputActionValue& Value)
 
 void AProjectAmeriaCharacter::Look(const FInputActionValue& Value)
 {
-	// input is a Vector2D
+	// 入力はVector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
-		// add yaw and pitch input to controller
+		// コントローラーに対してYawとPitchを追加
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
@@ -159,6 +200,7 @@ void AProjectAmeriaCharacter::DecreaseActionPoints(float Amount)
 {
 	CurrentActionPoints = FMath::Max(0.0f, CurrentActionPoints - Amount);
 	//UE_LOG(LogTemplateCharacter, Log, TEXT("Action points remain: %f"), CurrentActionPoints);
+	
 	// 行動力がゼロになったら次のターンへ移行する
 	if (CurrentActionPoints <= 0.0f)
 	{
@@ -267,10 +309,10 @@ float AProjectAmeriaCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 
 		UE_LOG(LogTemp, Log, TEXT("%s : HP = %f"), *GetName(), PlayerStats->GetHealth());
 
-		// Additional logic for when the character takes damage
+		// キャラクターがダメージを受けた時の追加ロジック
 		if (NewHealth <= 0)
 		{
-			// Handle character death
+			// キャラクターの死亡処理
 			UE_LOG(LogTemp, Log, TEXT("%s has died"), *GetName());
 		}
 	}
@@ -278,112 +320,82 @@ float AProjectAmeriaCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 	return ActualDamage;
 }
 
-float AProjectAmeriaCharacter::GetStrength() const
+//ステートマシン　アイドル状態
+void AProjectAmeriaCharacter::HandleIdleState()
 {
-	return PlayerStats->GetStrength();
+	// 待機状態の処理
 }
 
-void AProjectAmeriaCharacter::SetStrength(float Value)
+//ステートマシン攻撃対象選択状態
+void AProjectAmeriaCharacter::HandleSelectingTargetState()
 {
-	PlayerStats->SetStrength(Value);
+	// ターゲット選択状態の処理
 }
 
-float AProjectAmeriaCharacter::GetMagicPower() const
+//ステートマシン攻撃選択状態
+void AProjectAmeriaCharacter::HandleAttackingState()
 {
-	return PlayerStats->GetMagicPower();
+	// 攻撃状態の処理
 }
 
-void AProjectAmeriaCharacter::SetMagicPower(float Value)
+void AProjectAmeriaCharacter::ChangeState(EPlayerState NewState)
 {
-	PlayerStats->SetMagicPower(Value);
+	CurrentState = NewState;
 }
 
-float AProjectAmeriaCharacter::GetDefense() const
+void AProjectAmeriaCharacter::SelectTarget()
 {
-	return PlayerStats->GetEndurance();
+	if (CurrentState == EPlayerState::Idle)
+	{
+		ChangeState(EPlayerState::SelectingTarget);
+
+		TArray<AActor*> PotentialTargets;
+		UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UActionCharaInterface::StaticClass(), PotentialTargets);
+
+
+		// 距離で最も近いターゲットを選択
+		AActor* NearestTarget = nullptr;
+		float NearestDistance = FLT_MAX;
+		FVector PlayerLocation = GetActorLocation();
+
+		for (AActor* Target : PotentialTargets)
+		{
+			// 自分自身を除外
+			if (Target == this)
+			{
+				continue;
+			}
+
+			float Distance = FVector::Dist(PlayerLocation, Target->GetActorLocation());
+			if (Distance < NearestDistance)
+			{
+				NearestDistance = Distance;
+				NearestTarget = Target;
+			}
+		}
+
+		CurrentTarget = NearestTarget;
+
+		if (CurrentTarget)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Target selected: %s"), *CurrentTarget->GetName());
+			// ここにハイライト表示やインジケータを追加
+		}
+	}
+	else if (CurrentState == EPlayerState::SelectingTarget)
+	{
+		ExecuteAttack();
+		ChangeState(EPlayerState::Idle);
+	}
 }
 
-void AProjectAmeriaCharacter::SetDefense(float Value)
+void AProjectAmeriaCharacter::ExecuteAttack()
 {
-	PlayerStats->SetEndurance(Value);
-}
-
-float AProjectAmeriaCharacter::GetResistance() const
-{
-	return PlayerStats->GetMagicResistance();
-}
-
-void AProjectAmeriaCharacter::SetResistance(float Value)
-{
-	PlayerStats->SetMagicResistance(Value);
-}
-
-float AProjectAmeriaCharacter::GetHealth() const
-{
-	return PlayerStats->GetHealth();
-}
-
-void AProjectAmeriaCharacter::SetHealth(float Value)
-{
-	PlayerStats->SetHealth(Value);
-}
-
-float AProjectAmeriaCharacter::GetMana() const
-{
-	return PlayerStats->GetMana();
-}
-
-void AProjectAmeriaCharacter::SetMana(float Value)
-{
-	PlayerStats->SetMana(Value);
-}
-
-float AProjectAmeriaCharacter::GetEndurance() const
-{
-	return PlayerStats->GetEndurance();
-}
-
-void AProjectAmeriaCharacter::SetEndurance(float Value)
-{
-	PlayerStats->SetEndurance(Value);
-}
-
-float AProjectAmeriaCharacter::GetAgility() const
-{
-	return PlayerStats->GetAgility();
-}
-
-void AProjectAmeriaCharacter::SetAgility(float Value)
-{
-	PlayerStats->SetAgility(Value);
-}
-
-float AProjectAmeriaCharacter::GetDexterity() const
-{
-	return PlayerStats->GetDexterity();
-}
-
-void AProjectAmeriaCharacter::SetDexterity(float Value)
-{
-	PlayerStats->SetDexterity(Value);
-}
-
-float AProjectAmeriaCharacter::GetIntelligence() const
-{
-	return PlayerStats->GetIntelligence();
-}
-
-void AProjectAmeriaCharacter::SetIntelligence(float Value)
-{
-	PlayerStats->SetIntelligence(Value);
-}
-
-float AProjectAmeriaCharacter::GetCharisma() const
-{
-	return PlayerStats->GetCharisma();
-}
-
-void AProjectAmeriaCharacter::SetCharisma(float Value)
-{
-	PlayerStats->SetCharisma(Value);
+	if (CurrentTarget)
+	{
+		int32 ActionIndex = 0; // 例: アクションスロットの最初のアクションを使用する
+		UActionBase* Action=UActionUtility::CreateNewAction(GetWorld(), ActionSlots[ActionIndex]);
+		Action->ExecuteAction(this, CurrentTarget);
+		CurrentTarget = nullptr; // ターゲットをリセット
+	}
 }
